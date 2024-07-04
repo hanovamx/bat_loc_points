@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 
 # URL of the Excel file in the GitHub repository
@@ -27,12 +28,22 @@ def get_github_file_last_modified(repo_owner, repo_name, file_path):
             return datetime.strptime(last_modified_date, "%Y-%m-%dT%H:%M:%SZ")
     return None
 
+def convert_to_cst(utc_dt):
+    # Subtract 6 hours to convert UTC to CST
+    cst_dt = utc_dt - timedelta(hours=6)
+    return cst_dt
+
 # Streamlit app starts here
 st.set_page_config(page_title="Brands Week Bank", page_icon=":bank:", layout="wide")
 #st.title("Brands Week Bank")
 
-logo_url = "https://github.com/hanovamx/bat_loc_points/blob/main/brandsweek_logo.png"
-st.image(logo_url, width=200)
+logo_url = "https://raw.githubusercontent.com/hanovamx/bat_loc_points/main/brandsweek_logo.png"
+
+st.markdown(f"""
+    <div class="center">
+        <img src="{logo_url}" width="600">
+    </div>
+""", unsafe_allow_html=True)
 
 st.markdown("""
     <style>
@@ -40,6 +51,7 @@ st.markdown("""
         .main {
             background-color: #f0f0f0;
             font-family: 'Roboto', sans-serif;
+            color: black;
         }
         .stButton>button {
             color: white;
@@ -48,10 +60,19 @@ st.markdown("""
         .stTextInput>div>div>input {
             color: blue;
         }
+        .stMarkdown {
+            color: grey !important;
+        }
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 style='text-align: center; color: #E72582;'>Brands Week Bank</h1>", unsafe_allow_html=True)
+
 
 
 # Read the Excel file from the GitHub repository
@@ -63,7 +84,8 @@ repo_name = 'bat_loc_points'
 file_path = 'Brands%20Week%20Bank.xlsx'
 last_modified_date = get_github_file_last_modified(repo_owner, repo_name, file_path)
 if last_modified_date:
-    st.write(f"Last updated: {last_modified_date.strftime('%Y-%m-%d %H:%M:%S')}")
+    last_modified_date_cst = convert_to_cst(last_modified_date)
+    st.write(f"Last updated: {last_modified_date_cst.strftime('%Y-%m-%d %H:%M:%S')}")
 else:
     st.write("Last updated: End of yesterday")
 
